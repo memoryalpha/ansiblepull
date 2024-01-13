@@ -1,14 +1,19 @@
 [Unit]
 Description=%i service with docker compose
 PartOf=docker.service
-After=docker.service
+Requires=docker.service network-online.target
+After=docker.service network-online.target
 
 [Service]
-Type=oneshot
-RemainAfterExit=true
+Type=simple
+TimeoutStartSec=15min
+Restart=always
+
 WorkingDirectory=/mnt/ts01_volume/data/%i
-ExecStart=/bin/bash -c "docker compose up"
-ExecStop=/bin/bash -c "docker compose stop"
+
+ExecStartPre=/bin/bash -c "docker compose pull --quiet --ignore-pull-failures"
+ExecStart=/bin/bash -c "docker compose up --remove-orphans"
+ExecStop=/bin/bash -c "docker compose stop --remove-orphans"
 
 [Install]
 WantedBy=multi-user.target
