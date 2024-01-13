@@ -1,4 +1,4 @@
-- name: setup new Docker host
+- name: setup new Ubuntu VMs
   hosts: 127.0.0.1
   connection: local
   become: true
@@ -52,3 +52,8 @@
     - name: Install Docker Module for Python
       pip:
         name: docker
+    
+    - name: Create Docker Compose systemd service
+      template: src=docker-compose@.service dest=/lib/systemd/system/docker-compose@.service mode=644
+      notify:
+        - reload systemctl
