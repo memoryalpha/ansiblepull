@@ -1,0 +1,20 @@
+- name: setup service account for updates
+  hosts: 127.0.0.1
+  connection: local
+  become: true
+  tasks:
+    - name: Add the Update service user 
+      ansible.builtin.user:
+        name: svcusr_update
+        groups: sudo
+        shell: /bin/bash
+        password: $6$gbKVwLMz$yM3W1Qbe.WJcLVnt.KntrXgHKPNSQQqhvngV2XQ3Fp3DPcWSk4QWP.7DjFFYEMjspbU0oJFkrdXNmcfe63HHA1
+        createhome: yes 
+        home: /home/.svcusr_update
+        comment: John Doe
+        uid: 1122
+    - name: Set authorized keys taken from url
+      ansible.posix.authorized_key:
+        user: svcusr_update
+        state: present
+        key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINCYQhiiuXHwlbQi8eD05wvTbAx1KZP4f0VGaQ6Ue60h update@ansible
