@@ -19,13 +19,7 @@
         password: $6$gbKVwLMz$yM3W1Qbe.WJcLVnt.KntrXgHKPNSQQqhvngV2XQ3Fp3DPcWSk4QWP.7DjFFYEMjspbU0oJFkrdXNmcfe63HHA1
         createhome: yes 
         home: /home/.svcusr_update
-    - name: Get all Users
-      shell: 'cut -d: -f1 /etc/passwd'
-      register: all_users
-    - name: Print out Names
-      shell: 'echo {{ item }}'
-      with_items: del_user
-      when: item not in all_users.stdout_lines
+    
     - name: Prints Names
       ansible.builtin.debug:
         msg:
@@ -35,8 +29,9 @@
       ansible.builtin.debug:
         msg:
         - "all_users: {{ item }}"
-      with_items: del_user
-      when: item not in all_users.stdout_lines
+      with_items: "{{ del_user }}"
+      when: item in all_users.stdout_lines
+    
     - name: Remove Users
       ansible.builtin.user:
         name: "{{ item }}"
