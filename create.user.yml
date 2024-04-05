@@ -19,6 +19,9 @@
         password: $6$gbKVwLMz$yM3W1Qbe.WJcLVnt.KntrXgHKPNSQQqhvngV2XQ3Fp3DPcWSk4QWP.7DjFFYEMjspbU0oJFkrdXNmcfe63HHA1
         createhome: yes 
         home: /home/.svcusr_update
+    - name: Get all Users
+      shell: 'cut -d: -f1 /etc/passwd'
+      register: all_users
     
     - name: Prints Names
       ansible.builtin.debug:
