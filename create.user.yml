@@ -3,7 +3,7 @@
   connection: local
   become: true
   vars:
-    - allow_users: ""
+    del_user: ['netherkids_external_user', 'external']
   handlers:
     - name: restart_sshd
       service:
@@ -19,15 +19,16 @@
         password: $6$gbKVwLMz$yM3W1Qbe.WJcLVnt.KntrXgHKPNSQQqhvngV2XQ3Fp3DPcWSk4QWP.7DjFFYEMjspbU0oJFkrdXNmcfe63HHA1
         createhome: yes 
         home: /home/.svcusr_update
+    - shell: 'cut -d: -f1 /etc/passwd'
+      register: all_users
     - name: Remove Users
       ansible.builtin.user:
         user:
         name: "{{ item }}"
         state: absent
         remove: true
-      loop:
-        - netherkids_external_user
-        - external
+      with_items: del_user
+      when: item not in all_users.stdout_lines
     - name: Set authorized keys taken from url
       ansible.posix.authorized_key:
         user: svcusr_update
