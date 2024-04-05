@@ -24,25 +24,25 @@
         regexp: "{{ item.regexp }}"
         line: "{{ item.line }}" 
       loop:
-        - regexp: ^\(#\|\)Port
+        - regexp: ^[#\s]*Port
           line: Port 710
-        - regexp: ^\(#\|\)PermitRootLogin
+        - regexp: ^[#\s]*PermitRootLogin
           line: PermitRootLogin no
-        - regexp: ^\(#\|\)PasswordAuthentication
+        - regexp: ^[#\s]*PasswordAuthentication
           line: PasswordAuthentication no
-        - regexp: ^\(#\|\)PermitEmptyPasswords
+        - regexp: ^[#\s]*PermitEmptyPasswords
           line: PermitEmptyPasswords no
-        - regexp: ^\(#\|\)KbdInteractiveAuthentication
+        - regexp: ^[#\s]*KbdInteractiveAuthentication
           line: KbdInteractiveAuthentication no
-        - regexp: ^\(#\|\)ChallengeResponseAuthentication
+        - regexp: ^[#\s]*ChallengeResponseAuthentication
           line: ChallengeResponseAuthentication no
-        - regexp: ^\(#\|\)MaxAuthTries
+        - regexp: ^[#\s]*MaxAuthTries
           line: MaxAuthTries 7
-        - regexp: ^\(#\|\)AllowTcpForwarding
+        - regexp: ^[#\s]*AllowTcpForwarding
           line: AllowTcpForwarding no
-        - regexp: ^\(#\|\)X11Forwarding
+        - regexp: ^[#\s]*X11Forwarding
           line: X11Forwarding no
-        - regexp: ^\(#\|\)AllowAgentForwarding
+        - regexp: ^[#\s]*AllowAgentForwarding
           line: AllowAgentForwarding no
-        - regexp: ^\(#\|\)AuthorizedKeysFile
+        - regexp: ^[#\s]*AuthorizedKeysFile
           line: AuthorizedKeysFile .ssh\/authorized_keys/
