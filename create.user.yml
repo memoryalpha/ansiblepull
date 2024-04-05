@@ -29,7 +29,7 @@
     - name: Prints Names
       ansible.builtin.debug:
         msg:
-        - "all_users: {{ all_users }}"
+        - "all_users: {{ all_users.stdout_lines }}"
         - "del_user: {{ del_user }}"
     - name: Remove Users
       ansible.builtin.user:
