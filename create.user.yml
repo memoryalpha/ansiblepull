@@ -2,6 +2,8 @@
   hosts: localhost
   connection: local
   become: true
+  vars:
+    - allow_users: ""
   handlers:
     - name: restart_sshd
       service:
@@ -56,5 +58,7 @@
           line: DenyUsers root
         - regexp: ^[#\s]*DenyGroups
           line: DenyGroups root
+        - regexp: ^[#\s]*AllowUsers
+          line: AllowGroups sudo
       notify:
          - restart_sshd
