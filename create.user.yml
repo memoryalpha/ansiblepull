@@ -49,6 +49,6 @@
         - regexp: ^[#\s]*AllowAgentForwarding
           line: AllowAgentForwarding no
         - regexp: ^[#\s]*AuthorizedKeysFile
-          line: AuthorizedKeysFile .ssh\/authorized_keys/
+          line: AuthorizedKeysFile .ssh/authorized_keys/
       notify:
          - restart_sshd
