@@ -53,7 +53,7 @@
         - regexp: ^[#\s]*AuthorizedKeysFile
           line: AuthorizedKeysFile .ssh/authorized_keys
         - regexp: ^[#\s]*RSAAuthentication
-          line: \# RSAAuthentication yes
+          line: # RSAAuthentication yes
         - regexp: ^[#\s]*DenyUsers
           line: DenyUsers root
         - regexp: ^[#\s]*DenyGroups
