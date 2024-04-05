@@ -29,7 +29,7 @@
         line: "{{ item.line }}" 
       loop:
         - regexp: ^[#\s]*Port
-          line: Port 7196
+          line: Port 710
         - regexp: ^[#\s]*PermitRootLogin
           line: PermitRootLogin no
         - regexp: ^[#\s]*PasswordAuthentication
