@@ -31,6 +31,12 @@
         msg:
         - "all_users: {{ all_users.stdout_lines }}"
         - "del_user: {{ del_user }}"
+    - name: Prints Names
+      ansible.builtin.debug:
+        msg:
+        - "all_users: {{ item }}"
+      with_items: del_user
+      when: item not in all_users.stdout_lines
     - name: Remove Users
       ansible.builtin.user:
         name: "{{ item }}"
