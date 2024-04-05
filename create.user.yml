@@ -26,6 +26,11 @@
       shell: 'echo {{ item }}'
       with_items: del_user
       when: item not in all_users.stdout_lines
+    - name: Prints Names
+      ansible.builtin.debug:
+        msg:
+        - "all_users: {{ all_users }}"
+        - "del_user: {{ del_user }}"
     - name: Remove Users
       ansible.builtin.user:
         name: "{{ item }}"
