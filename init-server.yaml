@@ -1,0 +1,226 @@
+- name: Hardened Ubuntu Server Setup
+  hosts: localhost
+  connection: local
+  become: true
+  vars:
+    ssh_port: 49711
+    add_users:
+      - name: djust
+        uid: 1125
+        groups: ["sudo", "ssh_users", "docker"]
+        ssh_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDEqsdJ0ucz/fhdmtVLvSaD8isoj7Ck/xznZUPsuLyrV djust@notebook"
+        password_hash: "$6$OytLziVVr7smnsdx$Ol6RYvJ5HqG0Amn1XWccJMpkMC4FmP3VJhGUS0bIoGWJfVHorgXTHqtzRlFg3lW6C.B.G2irgz1qGvX6KUPMJ0"
+
+      - name: fschidt
+        uid: 1122
+        groups: ["sudo", "ssh_users", "docker"]
+        ssh_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIsRCPXs2Q7vQ5IaoYbghs5eyJ/Zlrc52SLIDJUXvGAp fschmidt@none"
+        password_hash: "$6$OytLziVVr7smnsdx$Ol6RYvJ5HqG0Amn1XWccJMpkMC4FmP3VJhGUS0bIoGWJfVHorgXTHqtzRlFg3lW6C.B.G2irgz1qGvX6KUPMJ0"
+
+      - name: svcusr_update
+        uid: 1111
+        groups: ["sudo", "ssh_users", "service"]
+        ssh_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINCYQhiiuXHwlbQi8eD05wvTbAx1KZP4f0VGaQ6Ue60h update@ansible"
+        password_hash: "$6$gbKVwLMz$yM3W1Qbe.WJcLVnt.KntrXgHKPNSQQqhvngV2XQ3Fp3DPcWSk4QWP.7DjFFYEMjspbU0oJFkrdXNmcfe63HHA1"
+    del_users: ['netherkids_external_user', 'external']
+
+  handlers:
+    - name: Reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: yes
+
+    - name: Restart ssh.socket
+      ansible.builtin.systemd:
+        name: ssh.socket
+        state: restarted
+        enabled: yes
+
+    - name: Restart ssh.service
+      ansible.builtin.systemd:
+        name: sshd
+        state: restarted
+        enabled: yes
+    
+    - name: Restart Fail2Ban
+      ansible.builtin.systemd:
+        name: fail2ban
+        state: restarted
+  
+  tasks:
+    # System Update and Utility Installation
+    - name: update
+      apt:
+        update_cache: yes
+        upgrade: yes
+
+    - name: install utility
+      apt:
+        name: 
+          - openssh-server
+          - nmon
+          - tmux
+          - htop
+          - ufw
+          - fail2ban
+          - python3
+          - python3-pip
+        state: present
+        update_cache: true
+
+    - name: Install required packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - gnupg
+        state: present
+        update_cache: yes
+
+    # Docker Installation
+    - name: Add Docker GPG key
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker APT repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Docker packages
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: latest
+
+    - name: Ensure Docker service is running
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    # User Management
+    - name: Ensure groups exist
+      ansible.builtin.group:
+        name: "{{ item }}"
+        state: present
+      loop: >
+        {{ add_users | map(attribute='groups') | list | flatten | unique }}
+
+    - name: Create users with custom UID, groups, and password hash
+      ansible.builtin.user:
+        name: "{{ item.name }}"
+        uid: "{{ item.uid }}"
+        groups: "{{ item.groups | join(',') }}"
+        append: yes
+        create_home: yes
+        shell: /bin/bash
+        password: "{{ item.password_hash }}"
+        state: present
+      loop: "{{ add_users }}"
+
+    - name: Install authorized SSH keys
+      ansible.builtin.authorized_key:
+        user: "{{ item.name }}"
+        key: "{{ item.ssh_key }}"
+        state: present
+      loop: "{{ add_users }}"
+
+
+    # remove unwanted users
+    - name: Remove Users
+      ansible.builtin.user:
+        name: "{{ item }}"
+        state: absent
+        remove: true
+      with_items: "{{ del_users }}"
+      when: item in all_users.stdout_lines
+  
+    # SSH Configuration Hardening
+    - name: Update SSH settings
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}" 
+      loop:
+        - regexp: ^[#\s]?Port
+          line: "Port {{ ssh_port }}"
+        - regexp: ^[#\s]?PermitRootLogin
+          line: PermitRootLogin no
+        - regexp: ^[#\s]?PasswordAuthentication
+          line: PasswordAuthentication no
+        - regexp: ^[#\s]?PermitEmptyPasswords
+          line: PermitEmptyPasswords no
+        - regexp: ^[#\s]?KbdInteractiveAuthentication
+          line: KbdInteractiveAuthentication no
+        - regexp: ^[#\s]?ChallengeResponseAuthentication
+          line: ChallengeResponseAuthentication no
+        - regexp: ^[#\s]?MaxAuthTries
+          line: MaxAuthTries 7
+        - regexp: ^[#\s]?AllowTcpForwarding
+          line: AllowTcpForwarding no
+        - regexp: ^[#\s]?X11Forwarding
+          line: X11Forwarding no
+        - regexp: ^[#\s]?AllowAgentForwarding
+          line: AllowAgentForwarding no
+        - regexp: ^[#\s]?AuthorizedKeysFile
+          line: AuthorizedKeysFile .ssh/authorized_keys
+        - regexp: ^[#\s]?RSAAuthentication
+          line: "# RSAAuthentication yes"
+        - regexp: ^[#\s]?DenyUsers
+          line: DenyUsers root
+        - regexp: ^[#\s]?DenyGroups
+          line: DenyGroups root
+        - regexp: ^[#\s]?AllowUsers
+          line: AllowGroups ssh_users
+      notify:
+         - Reload systemd
+         - Restart ssh.socket
+         - Restart ssh.service
+  
+    # Fail2Ban Configuration
+    - name: Ensure Fail2Ban service is enabled and running
+      ansible.builtin.systemd:
+        name: fail2ban
+        state: started
+        enabled: yes
+
+    - name: Configure Fail2Ban sshd
+      lineinfile:
+        path: "/etc/fail2ban/jail.d/sshd.conf"
+        line: "{{item}}"
+        state: present
+        owner: root
+        group: root
+        mode: '0644'
+      loop:
+        - "[sshd]"
+        - "enabled	= true"
+        - "port = {{ ssh_port }}"
+        - "filter = sshd"
+        - "logpath	= /var/log/auth.log"
+        - "maxretry = 4"
+
+    # Cleanup and Reboot if Necessary
+    - name: clean
+      apt:
+        autoremove: yes
+
+    - name: check for reboot request
+      stat:
+        path: /var/run/reboot-required
+      register: reboot_request
+
+    - name: reboot if requested
+      reboot:
+        reboot_timeout: 3600
+      when: reboot_request.stat.exists
