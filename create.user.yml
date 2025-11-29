@@ -42,35 +42,35 @@
         regexp: "{{ item.regexp }}"
         line: "{{ item.line }}" 
       loop:
-        - regexp: ^[#\s]*Port
-          line: Port 710
-        - regexp: ^[#\s]*PermitRootLogin
+        - regexp: ^[#\s]?Port
+          line: Port 49711
+        - regexp: ^[#\s]?PermitRootLogin
           line: PermitRootLogin no
-        - regexp: ^[#\s]*PasswordAuthentication
+        - regexp: ^[#\s]?PasswordAuthentication
           line: PasswordAuthentication no
-        - regexp: ^[#\s]*PermitEmptyPasswords
+        - regexp: ^[#\s]?PermitEmptyPasswords
           line: PermitEmptyPasswords no
-        - regexp: ^[#\s]*KbdInteractiveAuthentication
+        - regexp: ^[#\s]?KbdInteractiveAuthentication
           line: KbdInteractiveAuthentication no
-        - regexp: ^[#\s]*ChallengeResponseAuthentication
+        - regexp: ^[#\s]?ChallengeResponseAuthentication
           line: ChallengeResponseAuthentication no
-        - regexp: ^[#\s]*MaxAuthTries
+        - regexp: ^[#\s]?MaxAuthTries
           line: MaxAuthTries 7
-        - regexp: ^[#\s]*AllowTcpForwarding
+        - regexp: ^[#\s]?AllowTcpForwarding
           line: AllowTcpForwarding no
-        - regexp: ^[#\s]*X11Forwarding
+        - regexp: ^[#\s]?X11Forwarding
           line: X11Forwarding no
-        - regexp: ^[#\s]*AllowAgentForwarding
+        - regexp: ^[#\s]?AllowAgentForwarding
           line: AllowAgentForwarding no
-        - regexp: ^[#\s]*AuthorizedKeysFile
+        - regexp: ^[#\s]?AuthorizedKeysFile
           line: AuthorizedKeysFile .ssh/authorized_keys
-        - regexp: ^[#\s]*RSAAuthentication
+        - regexp: ^[#\s]?RSAAuthentication
           line: "#RSAAuthentication yes"
-        - regexp: ^[#\s]*DenyUsers
+        - regexp: ^[#\s]?DenyUsers
           line: DenyUsers root
-        - regexp: ^[#\s]*DenyGroups
+        - regexp: ^[#\s]?DenyGroups
           line: DenyGroups root
-        - regexp: ^[#\s]*AllowUsers
+        - regexp: ^[#\s]?AllowUsers
           line: AllowGroups sudo
       notify:
          - restart_sshd
