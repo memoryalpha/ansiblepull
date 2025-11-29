@@ -22,7 +22,6 @@
         groups: ["sudo", "ssh_users", "service"]
         ssh_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINCYQhiiuXHwlbQi8eD05wvTbAx1KZP4f0VGaQ6Ue60h update@ansible"
         password_hash: "$6$gbKVwLMz$yM3W1Qbe.WJcLVnt.KntrXgHKPNSQQqhvngV2XQ3Fp3DPcWSk4QWP.7DjFFYEMjspbU0oJFkrdXNmcfe63HHA1"
-    del_users: ['netherkids_external_user', 'external']
 
   handlers:
     - name: Reload systemd
@@ -134,16 +133,6 @@
         key: "{{ item.ssh_key }}"
         state: present
       loop: "{{ add_users }}"
-
-
-    # remove unwanted users
-    - name: Remove Users
-      ansible.builtin.user:
-        name: "{{ item }}"
-        state: absent
-        remove: true
-      with_items: "{{ del_users }}"
-      when: item in all_users.stdout_lines
   
     # SSH Configuration Hardening
     - name: Update SSH settings
