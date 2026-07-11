@@ -13,7 +13,7 @@
     - name: Add the Update service user 
       ansible.builtin.user:
         name: svcusr_update
-        uid: 1122
+        uid: 9997
         groups: sudo
         shell: /bin/bash
         password: $6$gbKVwLMz$yM3W1Qbe.WJcLVnt.KntrXgHKPNSQQqhvngV2XQ3Fp3DPcWSk4QWP.7DjFFYEMjspbU0oJFkrdXNmcfe63HHA1
